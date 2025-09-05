@@ -117,7 +117,7 @@ class Grid:
         self.move_number = 0
         self.total_reward = 0
         state = self.start
-        trajectory = []  # store (state, reward)
+        trajectory = []  
 
         while self.move_number < self.episode_size:
             if state not in self.Q_values:
@@ -181,6 +181,7 @@ class Grid:
 
 
 
+import random
 @app.route("/train", methods=["POST"])
 def train():
     data = request.json
@@ -189,13 +190,13 @@ def train():
     epsilon = float(data.get("epsilon", 0.1))
     gamma = float(data.get("gamma", 0.9))
     episodes = int(data.get("episodes", 300))
+    num_res = int(data.get("restricted", random.randint(0,int(size*size/5))))
     start = (0, 0)
     end = (size - 1, size - 1)
 
     restricted = set()
-    # generate some restricted cells
-    import random
-    no_res = random.randint(int(size**2 / 6), int(size**2 / 5))
+    
+    no_res = num_res
     while len(restricted) < no_res:
         ri, rj = random.randint(0, size - 1), random.randint(0, size - 1)
         if (ri, rj) != start and (ri, rj) != end:

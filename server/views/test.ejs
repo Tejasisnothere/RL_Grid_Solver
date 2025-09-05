@@ -308,6 +308,9 @@
 
           <label for="episodes">Episodes:</label>
           <input type="number" id="episodes" value="500">
+
+          <label for="restricted">Restricted cells:</label>
+          <input type="number" id="restricted">
       </div>
       <button id="send_params">Train & Render Grid</button>
   </div>
@@ -357,7 +360,8 @@
           alpha: parseFloat(document.getElementById("alpha").value),
           epsilon: parseFloat(document.getElementById("epsilon").value),
           gamma: parseFloat(document.getElementById("gamma").value),
-          episodes: parseInt(document.getElementById("episodes").value)
+          episodes: parseInt(document.getElementById("episodes").value),
+          restricted: parseInt(document.getElementById("restricted").value)
       };
 
       trainButton.disabled = true;
