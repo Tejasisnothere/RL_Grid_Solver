@@ -369,7 +369,7 @@
       loader.style.display = 'block';
       resultsDiv.style.display = 'none';
 
-      axios.post("https://rl-grid-solver-l6uw.onrender.com/train", payload)
+      axios.post("/train", payload)
         .then(response => {
           console.log("Server Response:", response.data);
           resultsDiv.style.display = 'block';
