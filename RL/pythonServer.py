@@ -218,6 +218,8 @@ def train():
     "size": g.size
     })
 
+import os
 
 if __name__ == "__main__":
-    app.run()
+    port = int(os.environ.get("PORT", 10000))  # Use Render's assigned port
+    app.run(host="0.0.0.0", port=port)
