@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import random
 from flask_cors import CORS
+
 app = Flask(__name__)
 CORS(app)
 
@@ -181,6 +182,11 @@ class Grid:
 
 
 import random
+
+@app.route("/")
+def get_home():
+    return render_template("test.ejs")
+
 @app.route("/train", methods=["POST"])
 def train():
     data = request.json

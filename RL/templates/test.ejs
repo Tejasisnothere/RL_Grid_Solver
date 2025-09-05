@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RL Grid Visualizer</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary-light: #3B82F6;
+      --color-primary-hover-light: #2563EB;
+      --color-background-light: #F3F4F6;
+      --color-panel-light: #FFFFFF;
+      --color-text-light: #1F2937;
+      --color-subtle-text-light: #6B7280;
+      --color-border-light: #D1D5DB;
+
+      --color-primary-dark: #60A5FA;
+      --color-primary-hover-dark: #3B82F6;
+      --color-background-dark: #111827;
+      --color-panel-dark: rgba(31, 41, 55, 0.7);
+      --color-text-dark: #F9FAFB;
+      --color-subtle-text-dark: #9CA3AF;
+      --color-border-dark: #4B5563;
+      
+      --color-start: #3B82F6;
+      --color-end: #A855F7;
+      --color-restricted: #EF4444;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+      background: var(--color-background-light);
+      color: var(--color-text-light);
+      margin: 0;
+      padding: 2rem;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    body::before {
+        content: '';
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, rgba(59,130,246,0) 60%);
+        border-radius: 50%;
+        top: -10%;
+        left: -10%;
+        z-index: 0;
+        animation: pulse 15s infinite alternate;
+    }
+
+    .dark {
+        background: var(--color-background-dark);
+        color: var(--color-text-dark);
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(0.8); }
+        100% { transform: scale(1.2); }
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    h2 {
+        font-size: 2.25rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--color-subtle-text-light);
+        margin-top: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    .dark h3 { color: var(--color-subtle-text-dark); }
+
+    .controls {
+      background: var(--color-panel-light);
+      padding: 1.5rem 2rem;
+      border-radius: 0.75rem;
+      box-shadow: var(--shadow);
+      display: inline-block;
+      text-align: left;
+      border: 1px solid var(--color-border-light);
+      transition: background-color 0.3s ease;
+    }
+    
+    .dark .controls {
+        background: var(--color-panel-dark);
+        border-color: var(--color-border-dark);
+        backdrop-filter: blur(10px);
+    }
+    
+    .control-group {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .control-group label {
+        font-weight: 500;
+        color: var(--color-subtle-text-light);
+    }
+    .dark .control-group label { color: var(--color-subtle-text-dark); }
+    
+    .control-group input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid var(--color-border-light);
+        border-radius: 0.375rem;
+        font-size: 1rem;
+        box-sizing: border-box;
+        background: var(--color-background-light);
+        color: var(--color-text-light);
+    }
+    .dark .control-group input {
+        background: var(--color-background-dark);
+        border-color: var(--color-border-dark);
+        color: var(--color-text-dark);
+    }
+
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      background: var(--color-primary-light);
+      color: white;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background-color 0.2s ease-in-out;
+    }
+    .dark button { background: var(--color-primary-dark); }
+    button:hover:not(:disabled) { background: var(--color-primary-hover-light); }
+    .dark button:hover:not(:disabled) { background: var(--color-primary-hover-dark); }
+    button:disabled {
+        background-color: #9CA3AF;
+        cursor: not-allowed;
+    }
+
+    .grid {
+      display: grid;
+      gap: 3px;
+      margin: 20px auto;
+      border: 1px solid var(--color-border-light);
+      background-color: var(--color-border-light);
+      width: max-content;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .dark .grid { 
+        border-color: var(--color-border-dark); 
+        background-color: var(--color-border-dark);
+    }
+    .cell {
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--color-text-light);
+        position: relative;
+    }
+     .dark .cell {
+        color: var(--color-text-dark);
+     }
+    
+    .cell .tooltip {
+        visibility: hidden;
+        width: 120px;
+        background-color: #222;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        position: absolute;
+        z-index: 10;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -60px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+
+    .cell:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .loader {
+        margin: 1rem auto;
+        border: 4px solid rgba(0,0,0,0.1);
+        border-top: 4px solid var(--color-primary-light);
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+        display: none;
+    }
+    .dark .loader { border-color: rgba(255,255,255,0.1); border-top-color: var(--color-primary-dark); }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Theme Toggle Switch */
+    .theme-switch-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .theme-switch {
+        display: inline-block;
+        height: 24px;
+        position: relative;
+        width: 48px;
+    }
+    .theme-switch input {
+        display:none;
+    }
+    .slider {
+        background-color: #ccc;
+        bottom: 0;
+        cursor: pointer;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transition: .4s;
+        border-radius: 34px;
+    }
+    .slider:before {
+        background-color: #fff;
+        bottom: 4px;
+        content: "";
+        height: 16px;
+        left: 4px;
+        position: absolute;
+        transition: .4s;
+        width: 16px;
+        border-radius: 50%;
+    }
+    input:checked + .slider {
+        background-color: var(--color-primary-dark);
+    }
+    input:checked + .slider:before {
+        transform: translateX(24px);
+    }
+
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h2>Reinforcement Learning Visualizer</h2>
+    <div class="theme-switch-wrapper">
+      ☀️
+      <label class="theme-switch">
+          <input type="checkbox" id="theme-toggle">
+          <span class="slider"></span>
+      </label>
+      🌙
+    </div>
+  </div>
+  <div class="controls">
+      <div class="control-group">
+          <label for="size">Grid Size:</label>
+          <input type="number" id="size" value="10">
+
+          <label for="alpha">Alpha (α):</label>
+          <input type="number" id="alpha" step="0.01" value="0.1">
+          
+          <label for="epsilon">Epsilon (ε):</label>
+          <input type="number" id="epsilon" step="0.01" value="0.9">
+          
+          <label for="gamma">Gamma (γ):</label>
+          <input type="number" id="gamma" step="0.01" value="0.9">
+
+          <label for="episodes">Episodes:</label>
+          <input type="number" id="episodes" value="500">
+
+          <label for="restricted">Restricted cells:</label>
+          <input type="number" id="restricted">
+      </div>
+      <button id="send_params">Train & Render Grid</button>
+  </div>
+  <div id="loader" class="loader"></div>
+
+  <div id="results" style="display: none;">
+      <h3>Grid Visualization</h3>
+      <div id="grid" class="grid"></div>
+  </div>
+</div>
+
+  <script>
+    const trainButton = document.getElementById("send_params");
+    const loader = document.getElementById("loader");
+    const resultsDiv = document.getElementById("results");
+    const themeToggle = document.getElementById('theme-toggle');
+
+    // --- Theme Control ---
+    function setTheme(isDark) {
+        if (isDark) {
+            document.body.classList.add('dark');
+            themeToggle.checked = true;
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.classList.remove('dark');
+            themeToggle.checked = false;
+            localStorage.setItem('theme', 'light');
+        }
+    }
+
+    themeToggle.addEventListener('change', () => {
+        setTheme(themeToggle.checked);
+    });
+    
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        setTheme(true);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !savedTheme) {
+        setTheme(true); 
+    }
+
+   
+    trainButton.onclick = () => {
+      const payload = {
+          size: parseInt(document.getElementById("size").value),
+          alpha: parseFloat(document.getElementById("alpha").value),
+          epsilon: parseFloat(document.getElementById("epsilon").value),
+          gamma: parseFloat(document.getElementById("gamma").value),
+          episodes: parseInt(document.getElementById("episodes").value),
+          restricted: parseInt(document.getElementById("restricted").value)
+      };
+
+      trainButton.disabled = true;
+      trainButton.innerText = "Training...";
+      loader.style.display = 'block';
+      resultsDiv.style.display = 'none';
+
+      axios.post("http://127.0.0.1:3000/train", payload)
+        .then(response => {
+          console.log("Server Response:", response.data);
+          resultsDiv.style.display = 'block';
+          renderGrid(response.data.grid, response.data.state_values);
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          alert("Error communicating with the server. Please ensure it's running on port 3000.");
+        })
+        .finally(() => {
+            trainButton.disabled = false;
+            trainButton.innerText = "Train & Render Grid";
+            loader.style.display = 'none';
+        });
+    };
+
+    function renderGrid(grid, stateValues) {
+      const container = document.getElementById("grid");
+      container.innerHTML = "";
+      const size = grid.length;
+
+      const allValues = stateValues.flat().filter(v => v !== 0 && !isNaN(v));
+      const minVal = Math.min(...allValues);
+      const maxVal = Math.max(...allValues);
+      
+      container.style.gridTemplateColumns = `repeat(${size}, 35px)`;
+      container.style.gridTemplateRows = `repeat(${size}, 35px)`;
+
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+
+          const cellType = grid[i][j];
+          let tooltipText = `State: (${i}, ${j})`;
+
+          if (cellType === 1) { // Restricted
+            cell.style.background = "var(--color-restricted)";
+            tooltipText += "<br>Type: Obstacle";
+          } else if (cellType === 2) { // Start
+            cell.style.background = "var(--color-start)";
+             tooltipText += "<br>Type: Start";
+          } else if (cellType === 3) { // End
+            cell.style.background = "var(--color-end)";
+            tooltipText += "<br>Type: Goal";
+          } else { // Accessible path
+            const val = stateValues[i][j];
+            tooltipText += `<br>Value: ${val.toFixed(2)}`;
+            const range = maxVal - minVal;
+            const normalized = range > 0 ? (val - minVal) / range : 0;
+            
+            // Inverted Gradient: Higher values => lighter green
+            const lightness = 40 + (normalized * 50); 
+            cell.style.background = `hsl(120, 70%, ${lightness}%)`;
+            
+            // Display the rounded value on the cell
+            cell.innerText = val.toFixed(0);
+
+            // Adjust text color on very light cells for better contrast
+            if(lightness > 75){
+                cell.style.color = '#333';
+            }
+          }
+
+          const tooltip = document.createElement('span');
+          tooltip.className = 'tooltip';
+          tooltip.innerHTML = tooltipText;
+          cell.appendChild(tooltip);
+
+          container.appendChild(cell);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
+
