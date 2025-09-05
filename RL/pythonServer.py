@@ -185,7 +185,7 @@ import random
 
 @app.route("/")
 def get_home():
-    return render_template("test.html")
+    return render_template("test.ejs")
 
 @app.route("/train", methods=["POST"])
 def train():
