@@ -4,9 +4,9 @@ document.getElementById("send_params").onclick = () => {
   const epsilon = parseFloat(document.getElementById("epsilon").value)
   const gamma = parseFloat(document.getElementById("gamma").value)
   const episodes = parseFloat(document.getElementById("episodes").value)
-  const restricted = parseFloat(document.getElementById("restricted").value)
+  const restricted = parseInt(document.getElementById("restricted").value)
 
-  axios.post("http://localhost:3000/train", {
+  axios.post("http://127.0.0.1:3000/train", {
     size,
     alpha,
     epsilon,

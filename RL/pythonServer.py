@@ -49,13 +49,13 @@ class Grid:
             row = []
             for j in range(self.size):
                 if (i, j) in self.restricted:
-                    row.append(1)   # restricted
+                    row.append(1)  
                 elif (i, j) == self.start:
-                    row.append(2)   # start
+                    row.append(2) 
                 elif (i, j) == self.end:
-                    row.append(3)   # end
+                    row.append(3)  
                 else:
-                    row.append(0)   # free
+                    row.append(0)   
             grid_data.append(row)
         return grid_data
 
@@ -140,7 +140,6 @@ class Grid:
             if state == self.end:
                 break
 
-        # Monte Carlo update
         G = 0
         for (s, r) in reversed(trajectory):
             G = self.gamma * G + r
@@ -213,6 +212,8 @@ def train():
     "size": g.size
     })
 
+import os
 
 if __name__ == "__main__":
-    app.run(port=3000, debug=True)
+    port = int(os.environ.get("PORT", 3000)) 
+    app.run(host="0.0.0.0", port=port)

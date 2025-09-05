@@ -350,10 +350,10 @@
     if (savedTheme === 'dark') {
         setTheme(true);
     } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !savedTheme) {
-        setTheme(true); // Auto-detect dark mode
+        setTheme(true); 
     }
 
-    // --- API Call & Rendering ---
+   
     trainButton.onclick = () => {
       const payload = {
           size: parseInt(document.getElementById("size").value),
