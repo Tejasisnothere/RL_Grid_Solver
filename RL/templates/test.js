@@ -6,7 +6,7 @@ document.getElementById("send_params").onclick = () => {
   const episodes = parseFloat(document.getElementById("episodes").value)
   const restricted = parseInt(document.getElementById("restricted").value)
 
-  axios.post("https://rl-grid-solver-l6uw.onrender.com:3000/train", {
+  axios.post("https://rl-grid-solver-l6uw.onrender.com/train", {
     size,
     alpha,
     epsilon,
