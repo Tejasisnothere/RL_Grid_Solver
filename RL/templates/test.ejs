@@ -369,7 +369,7 @@
       loader.style.display = 'block';
       resultsDiv.style.display = 'none';
 
-      axios.post("http://127.0.0.1:3000/train", payload)
+      axios.post("https://rl-grid-solver-l6uw.onrender.com/train", payload)
         .then(response => {
           console.log("Server Response:", response.data);
           resultsDiv.style.display = 'block';
@@ -377,7 +377,7 @@
         })
         .catch(error => {
           console.error("Error:", error);
-          alert("Error communicating with the server. Please ensure it's running on port 3000.");
+          alert("Error communicating with the server.");
         })
         .finally(() => {
             trainButton.disabled = false;
